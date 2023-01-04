@@ -1,2 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using ModifiedATM.View;
+using System.ComponentModel.Design;
+using System;
+
+View view = new View();
+
+view.Loginscreen();

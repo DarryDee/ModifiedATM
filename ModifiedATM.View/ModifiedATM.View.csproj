@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ModifiedATM.BLL\ModifiedATM.BLL.csproj" />
+    <ProjectReference Include="..\ModifiedATM.BO\ModifiedATM.BO.csproj" />
+  </ItemGroup>
+
 </Project>

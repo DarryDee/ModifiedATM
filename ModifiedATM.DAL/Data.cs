@@ -1,68 +1,152 @@
 ﻿using ModifiedATM.BO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
-public class Data
+namespace ModifiedATM.DAL
 {
-    // Returns a list of objects from file
-    public static List<T> ReadFile<T>(string filePath)
+
+    public class Data
     {
-        var results = new List<T>();
-
-        try
+        // Returns a list of objects from file
+        public static List<T> ReadFile<T>(string filePath)
         {
-            // Read the file and deserialize the JSON data
-            var json = File.ReadAllText(filePath);
-            var customers = JsonConvert.DeserializeObject<List<T>>(json);
+            var results = new List<T>();
 
-            if (customers != null)
+            try
             {
-                
-                // Iterate through the list of objects and set the properties of the T object
-                foreach (var customer in customers)
+                // Read the file and deserialize the JSON data
+                var json = File.ReadAllText(filePath);
+                var customers = JsonConvert.DeserializeObject<List<T>>(json);
+
+                if (customers != null)
                 {
-                    results.Add(customer);
+
+                    // Iterate through the list of objects and set the properties of the T object
+                    foreach (var customer in customers)
+                    {
+                        results.Add(customer);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while reading the file: {ex.Message}");
+            }
+
+            return results;
+        }
+
+
+        // Checks if an username is in File
+        public bool IsInFile(string username)
+        {
+            List<Customer> results = ReadFile<Customer>("customer.txt");
+            foreach (Customer customer in results)
+            {
+                if (customer.Username == username)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public Customer? GetCustomer (string username)
+        {
+            List<Customer> name = ReadFile<Customer>("customer.txt");
+
+            foreach(Customer customer in name)
+            {
+                if(customer.Username == username)
+                {
+                    return customer;
+                }
+            }
+            return null;
+        }
+        
+        public Customer? GetCustomerOfPin(int pin)
+        {
+            List<Customer> number = ReadFile<Customer>("customer.txt");
+
+            foreach(Customer customer in number)
+            {
+                if(customer.AccountNumber == pin)
+                {
+                    return customer;
+                }
+            }
+            return null;
+        }
+
+        // Checks if Pin is in File
+        public bool PinIsInFile(int pin)
+        {
+            List<Customer> results = ReadFile<Customer>("customer.txt");
+            foreach (Customer customer in results)
+            {
+                if (customer.Pin == pin)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void UpdateFile(Customer customer)
+        {
+            List<Customer> list = ReadFile<Customer>("customer.txt");
+
+            for(int i = 0; 0 < list.Count; i++)
+            {
+                if (list[0].AccountNumber== customer.AccountNumber)
+                {
+                    list[0] = customer;
                 }
             }
         }
-        
 
-        catch (Exception ex)
+        public void SaveToFile<T>(List<T> list)
         {
-            Console.WriteLine($"An error occurred while reading the file: {ex.Message}");
-        }
-
-        return results;
-    }
-
-
-    // Checks if an username is in File
-    public bool IsInFile(string username)
-    {
-        List<Customer> results = ReadFile<Customer>("customer.txt");
-        foreach (Customer customer in results)
-        {
-            if (customer.Username == username)
+            // Overwrite the file with first object in the list
+            string jsonOutput = JsonConvert.SerializeObject(list[0]);
+            if (list[0] is Admin)
             {
-                return true;
+                File.WriteAllText("admins.txt", jsonOutput + Environment.NewLine);
+            }
+            else if (list[0] is Customer)
+            {
+                File.WriteAllText("customers.txt", jsonOutput + Environment.NewLine);
+            }
+
+            // Appends the other objects of list to the file
+            for (int i = 1; i < list.Count; i++)
+            {
+                AddToFile(list[i]);
             }
         }
         
-        return false;
-    }
-
-    // Checks if Pin is in File
-    public bool PinIsInFile(int pin)
-    {
-        List<Customer> results = ReadFile<Customer>("customer.txt");
-        foreach (Customer customer in results)
+        public void AddToFile<T>(T obj)
         {
-            if (customer.Pin == Convert.ToString(pin))
+            string jsonoutput = JsonConvert.SerializeObject(obj);
+
+            if (obj is Admin)
             {
-                return true;
+                File.AppendText("admin.txt" +jsonoutput + Environment.NewLine);
             }
+            else if (obj is Customer)
+            {
+                File.AppendText("customer.txt" +jsonoutput+ Environment.NewLine);
+            }
+           
+        }
+        public void ReduceBalance(Customer c, int withdraw)
+        {
+            c.Balance -= withdraw;
+            UpdateFile(c);
         }
 
-        return false;
     }
-
 }

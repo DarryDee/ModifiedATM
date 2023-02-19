@@ -2,6 +2,7 @@
 using ModifiedATM.BO;
 using ModifiedATM.DAL;
 using System;
+using System.Data;
 
 namespace ModifiedATM.BLL
 {
@@ -194,9 +195,15 @@ namespace ModifiedATM.BLL
 
         public void DepositCash(string username) 
         {
+
+            Data data = new();
+            Customer customer = data.GetCustomer(username);
+
             Console.WriteLine("Enter the cash amount to deposit: ");
 
             int deposit = Convert.ToInt16(Console.ReadLine());
+
+            customer.Balance += deposit;
 
             Console.WriteLine("\nCash Deposited Successfully.");
 
@@ -207,17 +214,23 @@ namespace ModifiedATM.BLL
             {
                 DateTime t = DateTime.Now;
 
-                string message = "Amount Transferred: ";
-                PrintReceipt(customer, message, withdraw, t);
-            }
-            else
-            {
-
+                string message = "Deposited: ";
+                PrintReceipt(customer, message, deposit, t);
             }
         }
 
         public void DisplayBalance(string username)
         {
+            Data data = new();
+            
+            Customer customer = data.GetCustomer(username);
+
+            Console.WriteLine("Account  #" + customer.AccountNumber);
+
+            DateTime t = DateTime.Now;
+            Console.WriteLine($"Date: {t:dd/MM/yyyy}\n");
+
+            Console.WriteLine("Balance: " + customer.Balance);
 
         }
 
@@ -228,7 +241,7 @@ namespace ModifiedATM.BLL
          
         public static void PrintReceipt(Customer customer,string message,int withdrawn, DateTime t)
         {
-            Console.WriteLine($"{customer.AccountNumber}");
+            Console.WriteLine($"Account #{customer.AccountNumber}");
             Console.WriteLine($"Date: {t:dd/MM/yyyy}");
             Console.WriteLine("\n"+ message, withdrawn);
             Console.WriteLine($"{customer.Balance}");

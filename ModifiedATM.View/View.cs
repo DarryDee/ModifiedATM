@@ -98,7 +98,7 @@ namespace ModifiedATM.View
                             break;
 
                         case 2:
-                            logic.CashTransfer(username,pin);
+                            logic.CashTransfer(username);
                             break;
 
                         case 3:

@@ -107,7 +107,7 @@ namespace ModifiedATM.DAL
                 }
             }
         }
-
+        
         public void SaveToFile<T>(List<T> list)
         {
             // Overwrite the file with first object in the list

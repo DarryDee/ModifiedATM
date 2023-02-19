@@ -1,4 +1,5 @@
-﻿using ModifiedATM.BO;
+﻿
+using ModifiedATM.BO;
 using ModifiedATM.DAL;
 using System;
 
@@ -66,7 +67,9 @@ namespace ModifiedATM.BLL
                             {
                                 DateTime t = DateTime.Now;
 
-                                PrintReceipt(customer, select, t);
+                                string message = "You have withdrawn: ";
+
+                                PrintReceipt(customer, message ,select, t);
                             }
                             else
                             {
@@ -121,7 +124,6 @@ namespace ModifiedATM.BLL
             }
         }
 
-            rffg
         
 
 
@@ -145,7 +147,7 @@ namespace ModifiedATM.BLL
                 Data data1 = new();
                 Customer pincustomer = data.GetCustomerOfPin(guessnumber);
 
-                if (PinIsInFile(guessnumber)
+                if (PinIsInFile(guessnumber))
                 {
                     Console.WriteLine("You wish to deposit Rs " +  withdraw.ToString("0.000") + " in account held by " + pincustomer.Username  + " If this information is correct please re-enter the account number: ");
                     int guessnumber1 = Convert.ToInt16(Console.ReadLine());
@@ -175,8 +177,8 @@ namespace ModifiedATM.BLL
                 {
                     Console.WriteLine("You can't deposit Cash into your own account");
                 }
-
-                ffff
+                
+               
 
             }
             else

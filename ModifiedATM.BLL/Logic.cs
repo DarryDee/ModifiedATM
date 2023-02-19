@@ -129,6 +129,8 @@ namespace ModifiedATM.BLL
 
         public void CashTransfer(string username)
         {
+            CashTransferStart:
+
             Console.WriteLine("Enter amount in multiples of 500: ");
             int withdraw = Convert.ToInt16(Console.ReadLine());
 
@@ -170,7 +172,9 @@ namespace ModifiedATM.BLL
                     }
                     else
                     {
-
+                        
+                        Console.WriteLine("Account number not found!");
+                        goto CashTransferStart;
                     }
                 }
                 else
@@ -190,7 +194,26 @@ namespace ModifiedATM.BLL
 
         public void DepositCash(string username) 
         {
-           
+            Console.WriteLine("Enter the cash amount to deposit: ");
+
+            int deposit = Convert.ToInt16(Console.ReadLine());
+
+            Console.WriteLine("\nCash Deposited Successfully.");
+
+            Console.WriteLine("Do you wish to print a receipt (Y/N)? ");
+
+
+            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
+            {
+                DateTime t = DateTime.Now;
+
+                string message = "Amount Transferred: ";
+                PrintReceipt(customer, message, withdraw, t);
+            }
+            else
+            {
+
+            }
         }
 
         public void DisplayBalance(string username)

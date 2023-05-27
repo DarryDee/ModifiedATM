@@ -11,7 +11,7 @@ namespace ModifiedATM.BLL
         public bool IsInFile(string username)
         {
             Data data = new();
-
+            
             return data.IsInFile(username);
 
         }
@@ -245,10 +245,95 @@ namespace ModifiedATM.BLL
             Console.WriteLine($"Date: {t:dd/MM/yyyy}");
             Console.WriteLine("\n"+ message, withdrawn);
             Console.WriteLine($"{customer.Balance}");
-        }        
-        
-         #endregion
-    } 
+        }
+
+        #endregion
+
+        #region Admin
+
+        public void CreateNewAccount()
+        {
+            try
+            {
+                Customer createCustomer = new Customer();
+                Data data = new();
+
+                Console.WriteLine("Login: ");
+                createCustomer.Username = Console.ReadLine();
+
+                Console.WriteLine("Pin Code: ");
+                createCustomer.Pin = Convert.ToInt32(Console.ReadLine());
+
+            TypeSavings:
+
+                Console.WriteLine("Type: (Savings, Current) ");
+                string createCostumerS = Console.ReadLine();
+
+                if (createCostumerS == "Savings" || createCustomer.Typ == "Current")
+                {
+                    createCustomer.Typ = createCostumerS;
+                }
+                else
+                {
+                    Console.WriteLine("Type in Savings or Current\n");
+                    goto TypeSavings;
+                }
+
+
+                Console.WriteLine("Starting Balance: ");
+                createCustomer.Balance = Convert.ToInt32(Console.ReadLine());
+
+                Console.WriteLine("Status: ");
+                string createCustomerStatus = Console.ReadLine();
+
+                if (createCustomer.Status == "Active" || createCustomer.Status == "Passive")
+                {
+                    createCustomer.Status = createCustomerStatus;
+                }
+
+                int accountnumber = data.AccountNumberByOne(1);
+                createCustomer.AccountNumber = accountnumber;
+
+                data.UpdateFile(createCustomer);
+                Console.WriteLine("Account Successfully Created - the account number assigned is " + accountnumber);
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+
+        public void DeleteExistingAccount()
+        {
+
+        }
+
+        public void UpdateAccountInformation()
+        {
+
+        }
+
+        public void SearchForAccount()
+        {
+
+        }
+
+        public void ViewReports()
+        {
+
+        }
+
+        public void Exit()
+        {
+
+        }
+
+
+        #endregion
+    }
 
 }
 

@@ -127,5 +127,67 @@ namespace ModifiedATM.View
                 Console.WriteLine(ex.Message);
             }
         }
+
+
+        public void AdminView(string username, int pin)
+        {
+            Console.WriteLine("=====Admin View======");
+            Console.WriteLine("1=====Create New Account\n" +
+                "2=====Delete Existing Account\n"+ 
+                "3=====Update Account Information\n"+
+                "4=====Serach for Account\n"+ 
+                "5=====View Reports\n"+
+                "6=====Exit");
+
+        Options:
+            Console.WriteLine("Please enter one of the options above: ");
+
+            int options = Convert.ToInt16(Console.ReadLine());
+
+            Logic logic = new(); 
+            try
+            {
+                if (options == 1 || options == 2 || options == 3 || options == 4 || options == 5 || options == 6)
+                {
+
+
+                    switch (options)
+                    {
+                        case 1:
+                            logic.CreateNewAccount();
+                            break;
+
+                        case 2:
+                            logic.DeleteExistingAccount();
+                            break;
+
+                        case 3:
+                            logic.UpdateAccountInformation();
+                            break;
+
+                        case 4:
+                            logic.SearchForAccount();
+                            break;
+
+                        case 5:
+                            logic.ViewReports();
+                            break;
+
+                        case 6:
+                            logic.Exit();
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Choose an option between 1 - 6");
+                        goto Options;   
+                }
+            }
+            catch(Exception ex) 
+            { 
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }

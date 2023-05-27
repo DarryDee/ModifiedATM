@@ -52,6 +52,26 @@ namespace ModifiedATM.DAL
             return false;
         }
 
+        public int AccountNumberByOne(int guess)
+        {
+            List<Customer> number = ReadFile<Customer>("customer.txt");
+
+            foreach (Customer customer in number)
+            {
+                 if(customer.AccountNumber == guess)
+                 {
+                    guess++;
+
+                    if(customer.AccountNumber != guess)
+                    {
+                        return guess;
+                    }
+                 }
+
+            }
+            return guess;
+        }
+
         public Customer? GetCustomer (string username)
         {
             List<Customer> name = ReadFile<Customer>("customer.txt");
@@ -84,6 +104,7 @@ namespace ModifiedATM.DAL
         public bool PinIsInFile(int pin)
         {
             List<Customer> results = ReadFile<Customer>("customer.txt");
+
             foreach (Customer customer in results)
             {
                 if (customer.Pin == pin)
@@ -94,7 +115,19 @@ namespace ModifiedATM.DAL
 
             return false;
         }
+        public bool isInFile(Admin user)
+        {
+            List<Admin> list = ReadFile<Admin>("admin");
+            foreach(Admin admin in list)
+            {
+                if(admin.Name == user.Name && admin.Password == user.Password)
+                {
+                    return true;
+                }
+            }
 
+            return false;
+        }
         public void UpdateFile(Customer customer)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");
@@ -127,6 +160,8 @@ namespace ModifiedATM.DAL
                 AddToFile(list[i]);
             }
         }
+        
+
         
         public void AddToFile<T>(T obj)
         {

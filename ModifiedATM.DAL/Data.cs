@@ -17,7 +17,7 @@ namespace ModifiedATM.DAL
                 // Read the file and deserialize the JSON data
                 var json = File.ReadAllText(filePath);
                 var customers = JsonConvert.DeserializeObject<List<T>>(json);
-
+                
                 if (customers != null)
                 {
 
@@ -55,24 +55,36 @@ namespace ModifiedATM.DAL
         public int AccountNumberByOne(int guess)
         {
             List<Customer> number = ReadFile<Customer>("customer.txt");
+            
 
-            foreach (Customer customer in number)
+            HashSet<int> accountNumbers = new HashSet<int>(number.Select(c => c.AccountNumber));
+
+            while(accountNumbers.Contains(guess))
             {
-                 if(customer.AccountNumber == guess)
-                 {
-                    guess++;
-
-                    if(customer.AccountNumber != guess)
-                    {
-                        return guess;
-                    }
-                 }
-
+                guess++;
             }
             return guess;
+            
         }
 
-        public Customer? GetCustomer (string username)
+        public void DeleteAccount(Customer customer)
+        {
+            List<Customer> name = ReadFile<Customer>("customer.txt");
+
+            bool delete = name.Remove(customer);
+
+            if (delete)
+            {
+                SaveToFile(name);
+            }
+            else
+            {
+                Console.WriteLine("Problem occured");
+            }
+            
+        }
+
+        public Customer GetCustomer (string username)
         {
             List<Customer> name = ReadFile<Customer>("customer.txt");
 
@@ -86,7 +98,7 @@ namespace ModifiedATM.DAL
             return null;
         }
         
-        public Customer? GetCustomerOfPin(int pin)
+        public Customer GetCustomerOfPin(int pin)
         {
             List<Customer> number = ReadFile<Customer>("customer.txt");
 

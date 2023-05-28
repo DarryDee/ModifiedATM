@@ -308,7 +308,36 @@ namespace ModifiedATM.BLL
 
         public void DeleteExistingAccount()
         {
+            Data data = new();
+            Console.WriteLine("Enter the account number to which you want to delete: ");
+            int chooseAccount = Convert.ToInt32(Console.ReadLine());
 
+            Customer customer = data.GetCustomerOfPin(chooseAccount);
+
+            if(PinIsInFile(chooseAccount))
+            {
+                Console.WriteLine("You wish to delete the account held by " + customer.Username + "; If this Information is correct please re-enter the account number : ");
+                int chooseAccount1 = Convert.ToInt16(Console.ReadLine());
+
+                if(chooseAccount == chooseAccount1)
+                {
+                    data.DeleteAccount(customer);
+
+                    Console.WriteLine("Account Deleted Succesfully");
+                }
+                else
+                {
+                    Console.WriteLine("You typed in two different account numbers!");
+                }
+
+
+            }
+            else
+            {
+                Console.WriteLine("The account number you entered is not being held by anyone");
+            }
+
+            Console.WriteLine("Account Deleted Succesfully");
         }
 
         public void UpdateAccountInformation()

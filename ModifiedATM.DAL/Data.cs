@@ -140,18 +140,24 @@ namespace ModifiedATM.DAL
 
             return false;
         }
+
         public void UpdateFile(Customer customer)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");
-
-            for(int i = 0; 0 < list.Count; i++)
+            
+            for(int i = 0; i < list.Count; i++)
             {
-                if (list[0].AccountNumber== customer.AccountNumber)
+                if(customer == list[i])
                 {
-                    list[0] = customer;
+                    list[i] = customer;
                 }
             }
+
+            SaveToFile(list);
+
         }
+
+        
         
         public void SaveToFile<T>(List<T> list)
         {

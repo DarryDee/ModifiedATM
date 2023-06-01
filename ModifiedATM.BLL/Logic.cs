@@ -3,6 +3,8 @@ using ModifiedATM.BO;
 using ModifiedATM.DAL;
 using System;
 using System.Data;
+using System.Reflection;
+using System.Threading.Channels;
 
 namespace ModifiedATM.BLL
 {
@@ -342,7 +344,70 @@ namespace ModifiedATM.BLL
 
         public void UpdateAccountInformation()
         {
+            try
+            {
+                Console.WriteLine("Enter the Account Number you wish to update: ");
+                int accountNumber = Convert.ToInt32(Console.ReadLine());
 
+                Data data = new();
+
+                Customer customer = data.GetCustomerOfPin(accountNumber);
+
+                if (PinIsInFile(accountNumber))
+                {
+                    Console.WriteLine(
+                        $"Account #{customer.AccountNumber}\n" +
+                        $"Type: {customer.Typ}\n" +
+                        $"Holder: {customer.Username}\n" +
+                        $"Balance: {customer.Balance}\n" +
+                        $"Status:  {customer.Status}");
+
+                    Console.WriteLine("Please enter in the fields you wish to update (leave blank otherwise): ");
+
+                    Console.Write("Pin: ");
+
+                    string? changePin = Console.ReadLine();
+
+                    if (!string.IsNullOrEmpty(changePin))
+                    {
+                        customer.Pin = Convert.ToInt16(changePin);
+                    }
+
+                    // Change Holder's Name
+                    Console.WriteLine("Holders Name: ");
+
+                    string? changeName = Console.ReadLine();
+
+                    if (!string.IsNullOrEmpty(changeName))
+                    {
+                        customer.Username = changeName;
+                    }
+
+                    // Change Status
+
+                    string? changeStatus = Console.ReadLine();
+
+                    if(changeStatus == "Active" || changeStatus == "Passive")
+                    {
+                        if(!string.IsNullOrEmpty(changeStatus))
+                        {
+                            customer.Status = changeStatus;
+                        }
+                    }
+
+
+
+                }
+                else
+                {
+                    Console.WriteLine("Something went wrong.There is a possibility that the Account number is not found");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public void SearchForAccount()

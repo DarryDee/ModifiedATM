@@ -3,6 +3,7 @@ using ModifiedATM.BO;
 using ModifiedATM.DAL;
 using System;
 using System.Data;
+using System.Drawing;
 using System.Reflection;
 using System.Threading.Channels;
 
@@ -395,8 +396,6 @@ namespace ModifiedATM.BLL
                         }
                     }
 
-
-
                 }
                 else
                 {
@@ -412,6 +411,30 @@ namespace ModifiedATM.BLL
 
         public void SearchForAccount()
         {
+            Data data = new();
+
+            Console.WriteLine("Type in the following information to search for a specific account");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Search Menu");
+            Console.ResetColor();
+
+            Console.WriteLine("Account ID: ");
+            int? userID = Convert.ToInt16(Console.ReadLine());
+
+            Console.WriteLine("Holder Name: ");
+            string? name = Console.ReadLine();
+
+            Console.WriteLine("Type (Savings Current ): ");
+            string? type = Console.ReadLine();
+
+            Console.WriteLine("Balance: ");
+            int? balance= Convert.ToInt16(Console.ReadLine());
+
+            Console.WriteLine("Status");
+            string? status = Console.ReadLine();
+
+            
 
         }
 

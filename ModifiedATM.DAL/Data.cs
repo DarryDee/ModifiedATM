@@ -141,6 +141,23 @@ namespace ModifiedATM.DAL
             return false;
         }
 
+        public void SearchforAccount(int accountID, string name, string type, int balance, string status)
+        {
+            List<Customer> list = ReadFile<Customer>("customer.txt");
+
+            
+
+            foreach(Customer customer in list)
+            {
+                
+                if(accountID == customer.AccountNumber && name == customer.Username && type == customer.Typ && balance == customer.Balance && status == customer.Status)
+                {
+                    
+                    Console.WriteLine(  );
+                }
+            }
+        }
+
         public void UpdateFile(Customer customer)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");

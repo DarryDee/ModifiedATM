@@ -52,12 +52,27 @@ namespace ModifiedATM.View
                          break;
 
                       case 2:
+
+                            Admin admin = new();
+                            Logic logic1 = new();
+
                             Console.WriteLine("-----Admin-----");
                             Console.Write("\nEnter Login: ");
-                            string? login1 = Console.ReadLine();
+                            admin.Name = Console.ReadLine();
 
-                            Console.WriteLine("\nEnter Pin code ");
-                            int code1 = Convert.ToInt16(Console.ReadKey());
+                            Console.Write("\nEnter Pin code: ");
+                            admin.Password = Convert.ToInt32(Console.ReadLine());
+
+                            if (logic1.AdminInFile(admin))
+                            {
+                                AdminView(admin.Name, admin.Password);
+                            }
+                            
+                            else
+                            {
+                                Console.WriteLine("Login Failed.Please try again\n");
+                                goto Login;
+                            }
 
                             break;
                   }
@@ -74,6 +89,7 @@ namespace ModifiedATM.View
 
         public void CustomerView(string username, int pin)
         {
+            Console.Clear();
             Console.WriteLine("=====Customer Menu=====");
             Console.WriteLine("1----Withdraw Cash\n" +
                 "2----Cash Transfer\n" +
@@ -129,8 +145,9 @@ namespace ModifiedATM.View
         }
 
 
-        public void AdminView(string username, int pin)
+        public void AdminView(string? username, int? pin)
         {
+            Console.Clear();
             Console.WriteLine("=====Admin View======");
             Console.WriteLine("1=====Create New Account\n" +
                 "2=====Delete Existing Account\n"+ 

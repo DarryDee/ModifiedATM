@@ -1,6 +1,9 @@
 ﻿using ModifiedATM.BO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace ModifiedATM.DAL
 {
@@ -16,6 +19,10 @@ namespace ModifiedATM.DAL
             {
                 // Read the file and deserialize the JSON data
                 var json = File.ReadAllText(filePath);
+
+
+                // Before
+               //var customers = JsonConvert.DeserializeObject<List<T>>(json);
                 var customers = JsonConvert.DeserializeObject<List<T>>(json);
                 
                 if (customers != null)
@@ -57,7 +64,7 @@ namespace ModifiedATM.DAL
             List<Customer> number = ReadFile<Customer>("customer.txt");
             
 
-            HashSet<int> accountNumbers = new HashSet<int>(number.Select(c => c.AccountNumber));
+            HashSet<int?> accountNumbers = new HashSet<int?>(number.Select(c => c.AccountNumber));
 
             while(accountNumbers.Contains(guess))
             {
@@ -127,9 +134,9 @@ namespace ModifiedATM.DAL
 
             return false;
         }
-        public bool isInFile(Admin user)
+        public bool AdminInFile(Admin user)
         {
-            List<Admin> list = ReadFile<Admin>("admin");
+            List<Admin> list = ReadFile<Admin>("admin.txt");
             foreach(Admin admin in list)
             {
                 if(admin.Name == user.Name && admin.Password == user.Password)
@@ -141,33 +148,80 @@ namespace ModifiedATM.DAL
             return false;
         }
 
-        public void SearchforAccount(int accountID, string name, string type, int balance, string status)
+        public void SearchforAccount(int? accountID, string name, string type, int? balance, string status)
         {
-            List<Customer> list = ReadFile<Customer>("customer.txt");
-
+            List<Customer> customers = ReadFile<Customer>("customer.txt");
             
-
-            foreach(Customer customer in list)
+            foreach (Customer customer in customers)
             {
                 
-                if(accountID == customer.AccountNumber && name == customer.Username && type == customer.Typ && balance == customer.Balance && status == customer.Status)
+                #region CheckIfNull
+                if (accountID == null)
                 {
-                    
-                    Console.WriteLine(  );
+                    customer.AccountNumber = accountID;
                 }
+                if (name == null)
+                {
+                    customer.Username = name;
+                }
+                if (type == null)
+                {
+                    customer.Typ = type;
+                }
+                if (balance == null)
+                {
+                    customer.Balance = balance;
+                }
+                if (status == null)
+                {
+                    customer.Status = status;
+                }
+                #endregion 
+
+                if (customer.Username == name
+                && customer.AccountNumber == accountID 
+                && customer.Typ == type
+                && customer.Balance == balance
+                && customer.Status == status)
+                {
+                    List<Customer> SameDetails = new List<Customer>();
+
+                    SameDetails.Add(customer);
+
+                    Console.WriteLine("{0}   {1}   {2}   {3}   {4}", "User ID", "Holders Name", "Type", "Balance", "Status");
+
+                    Console.WriteLine(customer);
+                    //       Console.WriteLine("\n{0}   {1}   {2}   {3}   {4}",SameDetails.);
+                }
+                else
+                {
+                    Console.WriteLine("There is no Account with such Data you just passed in");
+                }
+                
             }
+
+
         }
 
         public void UpdateFile(Customer customer)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");
             
+            bool found = false;
+
             for(int i = 0; i < list.Count; i++)
             {
-                if(customer == list[i])
+                if (customer == list[i])
                 {
                     list[i] = customer;
-                }
+                    found = true;
+                    break;
+                }   
+            }
+
+            if (!found)
+            {
+                list.Add(customer);
             }
 
             SaveToFile(list);
@@ -176,42 +230,64 @@ namespace ModifiedATM.DAL
 
         
         
-        public void SaveToFile<T>(List<T> list)
+        public static void SaveToFile<T>(List<T> list)
         {
-            // Overwrite the file with first object in the list
-            string jsonOutput = JsonConvert.SerializeObject(list[0]);
-            if (list[0] is Admin)
+            
+            string jsonOutput = JsonConvert.SerializeObject(list, Formatting.Indented);
+            Console.WriteLine(list);
+            if (list is Admin)
             {
-                File.WriteAllText("admins.txt", jsonOutput + Environment.NewLine);
+                File.WriteAllText("admin.txt", jsonOutput + Environment.NewLine);
             }
             else if (list[0] is Customer)
             {
-                File.WriteAllText("customers.txt", jsonOutput + Environment.NewLine);
+
+                File.WriteAllText("customer.txt", jsonOutput + Environment.NewLine);
             }
 
+            /*
             // Appends the other objects of list to the file
             for (int i = 1; i < list.Count; i++)
             {
-                AddToFile(list[i]);
+                bool finished = false;
+                if(i == list.Count - 1)
+                {
+                    finished = true;
+                }
+                AddToFile(list[i], finished);
             }
+            */
         }
         
 
-        
-        public void AddToFile<T>(T obj)
+        /*
+        public static void AddToFile<T>(T obj, bool finished)
         {
-            string jsonoutput = JsonConvert.SerializeObject(obj);
-
+            string? jsonoutput = JsonConvert.SerializeObject(obj);
             if (obj is Admin)
             {
-                File.AppendText("admin.txt" +jsonoutput + Environment.NewLine);
+                File.AppendAllText("admin.txt", jsonoutput + Environment.NewLine);
             }
             else if (obj is Customer)
             {
-                File.AppendText("customer.txt" +jsonoutput+ Environment.NewLine);
+                File.AppendAllText("customer.txt", jsonoutput + Environment.NewLine);
             }
-           
-        }
+
+            
+            if (finished)
+            {
+                if(obj is Admin)
+                {
+                    File.AppendAllText("admin.txt", "]" + Environment.NewLine);
+                }
+
+                else if (obj is Customer)
+                {
+                    File.AppendAllText("customer.txt", "]" + Environment.NewLine);
+                }
+            }
+           */
+        
         public void ReduceBalance(Customer c, int withdraw)
         {
             c.Balance -= withdraw;

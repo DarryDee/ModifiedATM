@@ -4,6 +4,7 @@ using ModifiedATM.DAL;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Channels;
 
@@ -25,6 +26,13 @@ namespace ModifiedATM.BLL
 
             return data.PinIsInFile(pin);
 
+        }
+
+        public bool AdminInFile(Admin admin)
+        {
+            Data data = new();
+
+            return data.AdminInFile(admin);
         }
 
         #region Customer 
@@ -261,15 +269,15 @@ namespace ModifiedATM.BLL
                 Customer createCustomer = new Customer();
                 Data data = new();
 
-                Console.WriteLine("Login: ");
+                Console.Write("Name: ");
                 createCustomer.Username = Console.ReadLine();
 
-                Console.WriteLine("Pin Code: ");
+                Console.Write("Pin Code: ");
                 createCustomer.Pin = Convert.ToInt32(Console.ReadLine());
 
             TypeSavings:
 
-                Console.WriteLine("Type: (Savings, Current) ");
+                Console.Write("Type :(Savings, Current): ");
                 string createCostumerS = Console.ReadLine();
 
                 if (createCostumerS == "Savings" || createCustomer.Typ == "Current")
@@ -282,16 +290,21 @@ namespace ModifiedATM.BLL
                     goto TypeSavings;
                 }
 
-
-                Console.WriteLine("Starting Balance: ");
+            TypeStatus:
+                Console.Write("Starting Balance: ");
                 createCustomer.Balance = Convert.ToInt32(Console.ReadLine());
 
-                Console.WriteLine("Status: ");
+                Console.Write("Status: (Active, Passive): ");
                 string createCustomerStatus = Console.ReadLine();
 
-                if (createCustomer.Status == "Active" || createCustomer.Status == "Passive")
+                if (createCustomerStatus == "Active" || createCustomerStatus == "Passive")
                 {
                     createCustomer.Status = createCustomerStatus;
+                }
+                else
+                {
+                    Console.WriteLine("Type in Active or Passive\n");
+                    goto TypeStatus;
                 }
 
                 int accountnumber = data.AccountNumberByOne(1);
@@ -419,20 +432,63 @@ namespace ModifiedATM.BLL
             Console.WriteLine("Search Menu");
             Console.ResetColor();
 
-            Console.WriteLine("Account ID: ");
-            int? userID = Convert.ToInt16(Console.ReadLine());
+            // Account ID
+            int? userID;
+            Console.Write("Account ID: ");
+            string? userid = Console.ReadLine();
+            if(string.IsNullOrEmpty(userid))
+            {
+                userID = null;
+            }
+            else
+            {
+                userID = Convert.ToInt32(userid);
+            }
 
-            Console.WriteLine("Holder Name: ");
+
+            // Customer's Name
+            Console.Write("Holder Name: ");
             string? name = Console.ReadLine();
+            if(string.IsNullOrEmpty(name))
+            { 
+                name = null;
+            }
 
-            Console.WriteLine("Type (Savings Current ): ");
+
+            // Type of Customer's Account
+            Console.Write("Type (Savings Current ): ");
             string? type = Console.ReadLine();
+            if(string.IsNullOrEmpty(type))
+            {
+                type = null;
+            }
 
-            Console.WriteLine("Balance: ");
-            int? balance= Convert.ToInt16(Console.ReadLine());
 
-            Console.WriteLine("Status");
+            // Balance of Customer
+            Console.Write("Balance: ");
+            int? balance;
+            string? stringBalance = Console.ReadLine();
+            if(string.IsNullOrEmpty(stringBalance))
+            {
+                balance = null;
+            }
+            else
+            {
+                balance= Convert.ToInt32(stringBalance);
+            }
+
+
+            // Status of Customers Account
+            Console.Write("Status: ");
             string? status = Console.ReadLine();
+            if(string.IsNullOrEmpty(status))
+            {
+                status = null;
+            }
+
+            data.SearchforAccount(userID ,name ,type , balance, status);
+
+            // Code testen Zeile 179 in Data Class
 
             
 

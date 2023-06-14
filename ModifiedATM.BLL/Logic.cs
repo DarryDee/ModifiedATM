@@ -499,12 +499,6 @@ namespace ModifiedATM.BLL
 
         }
 
-        public void Exit()
-        {
-
-        }
-
-
         #endregion
     }
 

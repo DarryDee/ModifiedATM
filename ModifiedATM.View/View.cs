@@ -191,7 +191,7 @@ namespace ModifiedATM.View
                             break;
 
                         case 6:
-                            logic.Exit();
+                             Environment.Exit(0);
                             break;
                     }
                 }

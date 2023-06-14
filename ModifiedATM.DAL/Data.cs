@@ -24,7 +24,7 @@ namespace ModifiedATM.DAL
                 // Before
                //var customers = JsonConvert.DeserializeObject<List<T>>(json);
                 var customers = JsonConvert.DeserializeObject<List<T>>(json);
-                
+
                 if (customers != null)
                 {
 
@@ -151,57 +151,111 @@ namespace ModifiedATM.DAL
         public void SearchforAccount(int? accountID, string name, string type, int? balance, string status)
         {
             List<Customer> customers = ReadFile<Customer>("customer.txt");
-            
+            bool foundCustomer = false;
+
             foreach (Customer customer in customers)
             {
-                
-                #region CheckIfNull
-                if (accountID == null)
-                {
-                    customer.AccountNumber = accountID;
-                }
-                if (name == null)
-                {
-                    customer.Username = name;
-                }
-                if (type == null)
-                {
-                    customer.Typ = type;
-                }
-                if (balance == null)
-                {
-                    customer.Balance = balance;
-                }
-                if (status == null)
-                {
-                    customer.Status = status;
-                }
-                #endregion 
+                int? tempAccountID = accountID;
+                string tempName = name;
+                string tempType = type;
+                int? tempBalance = balance;
+                string tempStatus = status;
 
-                if (customer.Username == name
-                && customer.AccountNumber == accountID 
-                && customer.Typ == type
-                && customer.Balance == balance
-                && customer.Status == status)
+                #region CheckIfNull
+                if (tempAccountID == null)
                 {
+                    tempAccountID = customer.AccountNumber;
+                }
+                if (string.IsNullOrEmpty(tempName))
+                {
+                    tempName = customer.Username;
+                }
+                if (string.IsNullOrEmpty(tempType))
+                {
+                    tempType = customer.Typ;
+                }
+                if (tempBalance == null)
+                {
+                    tempBalance = customer.Balance;
+                }
+                if (string.IsNullOrEmpty(tempStatus))
+                {
+                    tempStatus =  customer.Status;
+                }
+
+                #endregion
+
+                if (customer.Username == tempName
+                && customer.AccountNumber == tempAccountID
+                && customer.Typ == tempType
+                && customer.Balance == tempBalance
+                && customer.Status == tempStatus)
+                {
+                    foundCustomer = true;
                     List<Customer> SameDetails = new List<Customer>();
 
                     SameDetails.Add(customer);
 
-                    Console.WriteLine("{0}   {1}   {2}   {3}   {4}", "User ID", "Holders Name", "Type", "Balance", "Status");
 
-                    Console.WriteLine(customer);
+                    
+                    
+                    Console.WriteLine("Account ID".PadRight(15)
+                                      + "Holders Name".PadRight(20)
+                                      + "Type".PadRight(10)
+                                      + "Balance".PadRight(14)
+                                      + "Status\n".PadRight(10));
+
+
+
+                    Console.WriteLine($"{customer.AccountNumber}".PadRight(15)
+                                        + $"{customer.Username}".PadRight(20)
+                                        + $"{customer.Typ}".PadRight(10)
+                                        + $"{customer.Balance}".PadRight(14)
+                                        + $"{customer.Status}\n\n".PadRight(10));
+                    
+
+                }
+
+                else if(!foundCustomer)
+                {
+                    Console.WriteLine("\nThere is no Account with such Data you just passed in");
+                    break;
+                }
+            }
+        }
+                /*
+                    if (SameDetails.Count > 0)
+                    {
+                        Console.WriteLine("Account ID".PadRight(15)
+                                       + "Holders Name".PadRight(20)
+                                       + "Type".PadRight(10)
+                                       + "Balance".PadRight(14)
+                                       + "Status\n".PadRight(10));
+
+
+
+                        Console.WriteLine($"{customer.AccountNumber}".PadRight(15)
+                                          + $"{customer.Username}".PadRight(20)
+                                          + $"{customer.Typ}".PadRight(10)
+                                          + $"{customer.Balance}".PadRight(14)
+                                          + $"{customer.Status}".PadRight(10));
+                    }
+
+                    else
+                    {
+                        Console.WriteLine("There is no Account with such Data you just passed in");
+                    }
+
                     //       Console.WriteLine("\n{0}   {1}   {2}   {3}   {4}",SameDetails.);
                 }
-                else
+
+                else if (!foundCustomer)
                 {
                     Console.WriteLine("There is no Account with such Data you just passed in");
                 }
-                
-            }
-
-
-        }
+                */
+            
+        
 
         public void UpdateFile(Customer customer)
         {
@@ -228,14 +282,14 @@ namespace ModifiedATM.DAL
 
         }
 
-        
-        
+
+
         public static void SaveToFile<T>(List<T> list)
         {
-            
+
             string jsonOutput = JsonConvert.SerializeObject(list, Formatting.Indented);
             Console.WriteLine(list);
-            if (list is Admin)
+            if (list[0] is Admin)
             {
                 File.WriteAllText("admin.txt", jsonOutput + Environment.NewLine);
             }
@@ -244,49 +298,8 @@ namespace ModifiedATM.DAL
 
                 File.WriteAllText("customer.txt", jsonOutput + Environment.NewLine);
             }
-
-            /*
-            // Appends the other objects of list to the file
-            for (int i = 1; i < list.Count; i++)
-            {
-                bool finished = false;
-                if(i == list.Count - 1)
-                {
-                    finished = true;
-                }
-                AddToFile(list[i], finished);
-            }
-            */
-        }
-        
-
-        /*
-        public static void AddToFile<T>(T obj, bool finished)
-        {
-            string? jsonoutput = JsonConvert.SerializeObject(obj);
-            if (obj is Admin)
-            {
-                File.AppendAllText("admin.txt", jsonoutput + Environment.NewLine);
-            }
-            else if (obj is Customer)
-            {
-                File.AppendAllText("customer.txt", jsonoutput + Environment.NewLine);
-            }
-
             
-            if (finished)
-            {
-                if(obj is Admin)
-                {
-                    File.AppendAllText("admin.txt", "]" + Environment.NewLine);
-                }
-
-                else if (obj is Customer)
-                {
-                    File.AppendAllText("customer.txt", "]" + Environment.NewLine);
-                }
-            }
-           */
+        }
         
         public void ReduceBalance(Customer c, int withdraw)
         {

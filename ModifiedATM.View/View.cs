@@ -24,7 +24,7 @@ namespace ModifiedATM.View
                       
                       case 1:
                             bool SignIn = true;
-                  Login:          
+                  LoginCustomer:          
                             
                             Logic logic = new();
                             Customer customer = new();
@@ -44,7 +44,7 @@ namespace ModifiedATM.View
                             else
                             {
                                 Console.WriteLine("Login Failed.Please try again\n");
-                                goto Login;
+                                goto LoginCustomer;
                             }
                             
                             
@@ -52,7 +52,7 @@ namespace ModifiedATM.View
                          break;
 
                       case 2:
-
+                    LoginAdmin:
                             Admin admin = new();
                             Logic logic1 = new();
 
@@ -71,7 +71,7 @@ namespace ModifiedATM.View
                             else
                             {
                                 Console.WriteLine("Login Failed.Please try again\n");
-                                goto Login;
+                                goto LoginAdmin;
                             }
 
                             break;

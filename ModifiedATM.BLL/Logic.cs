@@ -488,17 +488,53 @@ namespace ModifiedATM.BLL
 
             data.SearchforAccount(userID ,name ,type , balance, status);
 
-            // Code testen Zeile 179 in Data Class
-
-            
-
         }
 
         public void ViewReports()
         {
+            try
+            {
+                Data data = new();
 
+            choise:
+                {
+                    Console.Write("1---Account By Amount\n" +
+                                      "2---Account By Date\n\n" +
+                                      "Your choise: ");
+                }
+
+
+                string? option = Console.ReadLine();
+
+                if (option == "1")
+                {
+                    Console.Write("Enter the minimum amount: ");
+                    int? min = Convert.ToInt16(Console.ReadLine());
+
+                    Console.Write("Enter maximum amount: ");
+                    int? max = Convert.ToInt16(Console.ReadLine());
+
+                    data.SearchBetweenMaxAndMini(min, max);
+
+                }
+                else if (option == "2")
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("Give in a Valid Number\n");
+
+                    goto choise;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
-
+        
         #endregion
     }
 

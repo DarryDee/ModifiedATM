@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace ModifiedATM.DAL
@@ -180,7 +181,7 @@ namespace ModifiedATM.DAL
                 }
                 if (string.IsNullOrEmpty(tempStatus))
                 {
-                    tempStatus =  customer.Status;
+                    tempStatus = customer.Status;
                 }
 
                 #endregion
@@ -197,8 +198,8 @@ namespace ModifiedATM.DAL
                     SameDetails.Add(customer);
 
 
-                    
-                    
+
+
                     Console.WriteLine("Account ID".PadRight(15)
                                       + "Holders Name".PadRight(20)
                                       + "Type".PadRight(10)
@@ -212,50 +213,49 @@ namespace ModifiedATM.DAL
                                         + $"{customer.Typ}".PadRight(10)
                                         + $"{customer.Balance}".PadRight(14)
                                         + $"{customer.Status}\n\n".PadRight(10));
-                    
 
-                }
 
-                else if(!foundCustomer)
-                {
-                    Console.WriteLine("\nThere is no Account with such Data you just passed in");
-                    break;
                 }
             }
+
+            if (!foundCustomer)
+            {
+                Console.WriteLine("\nThere is no Account with such Data you just passed in");
+                
+            }
         }
-                /*
-                    if (SameDetails.Count > 0)
-                    {
-                        Console.WriteLine("Account ID".PadRight(15)
-                                       + "Holders Name".PadRight(20)
-                                       + "Type".PadRight(10)
-                                       + "Balance".PadRight(14)
-                                       + "Status\n".PadRight(10));
 
-
-
-                        Console.WriteLine($"{customer.AccountNumber}".PadRight(15)
-                                          + $"{customer.Username}".PadRight(20)
-                                          + $"{customer.Typ}".PadRight(10)
-                                          + $"{customer.Balance}".PadRight(14)
-                                          + $"{customer.Status}".PadRight(10));
-                    }
-
-                    else
-                    {
-                        Console.WriteLine("There is no Account with such Data you just passed in");
-                    }
-
-                    //       Console.WriteLine("\n{0}   {1}   {2}   {3}   {4}",SameDetails.);
-                }
-
-                else if (!foundCustomer)
+        public void SearchBetweenMaxAndMini(int? mini, int? max)
+        {
+            List<Customer> list = ReadFile<Customer>("customer.txt");
+            bool foundCustomer = false;
+            foreach (Customer customer in list)
+            {
+                if(customer.Balance >= mini && customer.Balance < max)
                 {
-                    Console.WriteLine("There is no Account with such Data you just passed in");
+                    foundCustomer = true;
+                    Console.WriteLine("\nAccount ID".PadRight(15)
+                                      + "Holders Name".PadRight(20)
+                                      + "Type".PadRight(10)
+                                      + "Balance".PadRight(14)
+                                      + "Status\n".PadRight(10));
+
+                    string formatBalance = string.Format(CultureInfo.GetCultureInfo("en-US"), "{0:C}", customer.Balance);
+
+                    Console.WriteLine($"{customer.AccountNumber}".PadRight(15)
+                                        + $"{customer.Username}".PadRight(20)
+                                        + $"{customer.Typ}".PadRight(10)
+                                        + $"{formatBalance}".PadRight(14)
+                                        + $"{customer.Status}\n\n".PadRight(10));
                 }
-                */
-            
-        
+                        
+            }
+
+            if (!foundCustomer)
+            {
+                Console.WriteLine("There is no Account between both amounts");
+            }
+        }
 
         public void UpdateFile(Customer customer)
         {

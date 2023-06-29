@@ -44,7 +44,6 @@ namespace ModifiedATM.DAL
             return results;
         }
 
-
         // Checks if an username is in File
         public bool IsInFile(string username)
         {
@@ -59,7 +58,8 @@ namespace ModifiedATM.DAL
 
             return false;
         }
-
+        
+        // Unique Account number when new Customer Account is being created 
         public int AccountNumberByOne(int guess)
         {
             List<Customer> number = ReadFile<Customer>("customer.txt");
@@ -75,6 +75,7 @@ namespace ModifiedATM.DAL
             
         }
 
+        // Deletes Account
         public void DeleteAccount(Customer customer)
         {
             List<Customer> name = ReadFile<Customer>("customer.txt");
@@ -92,6 +93,7 @@ namespace ModifiedATM.DAL
             
         }
 
+        // Retuturns Customer object
         public Customer GetCustomer (string username)
         {
             List<Customer> name = ReadFile<Customer>("customer.txt");
@@ -105,19 +107,35 @@ namespace ModifiedATM.DAL
             }
             return null;
         }
-        
-        public Customer GetCustomerOfPin(int pin)
+
+        // Returns Pin of Customer (validation reasons)
+        public Customer GetCustomerOfPin(int accountNumber)
         {
             List<Customer> number = ReadFile<Customer>("customer.txt");
 
             foreach(Customer customer in number)
             {
-                if(customer.AccountNumber == pin)
+                if(customer.AccountNumber == accountNumber)
                 {
                     return customer;
                 }
             }
             return null;
+        }
+
+        //Checks if AccountNumber is in File
+        public bool AccountNumberInFile(int accountNumber)
+        {
+            List<Customer> number = ReadFile<Customer>("customer.txt");
+
+            foreach (Customer customer in number)
+            {
+                if (customer.AccountNumber == accountNumber)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Checks if Pin is in File
@@ -135,6 +153,23 @@ namespace ModifiedATM.DAL
 
             return false;
         }
+
+        public bool LoginDetailsValid(string username, int pin)
+        {
+            List<Customer> results = ReadFile<Customer>("customer.txt");
+
+            foreach (Customer customer in results)
+            {
+                if (customer.Pin == pin && customer.Username == username)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // If Admin Prop. is the same as in File
         public bool AdminInFile(Admin user)
         {
             List<Admin> list = ReadFile<Admin>("admin.txt");
@@ -149,6 +184,7 @@ namespace ModifiedATM.DAL
             return false;
         }
 
+        // Loops through File and returns Accounts with the same Prop.
         public void SearchforAccount(int? accountID, string name, string type, int? balance, string status)
         {
             List<Customer> customers = ReadFile<Customer>("customer.txt");
@@ -225,6 +261,48 @@ namespace ModifiedATM.DAL
             }
         }
 
+        // Loopos through File to check Transaction activity
+        public void SearchDateOfAccount(string firstDate, string lastDate)
+        {
+            try
+            {
+                
+                DateTime startDate = DateTime.Parse(firstDate);
+                DateTime endDate = DateTime.Parse(lastDate);
+
+                bool found = false;
+                List<Transactions> transactions = ReadFile<Transactions>("transaction.txt");
+
+                foreach (Transactions transaction in transactions)
+                {
+                    if (transaction.Date > startDate && transaction.Date < endDate)
+                    {
+                        Console.WriteLine("\nTransaction Type".PadRight(22)
+                                      + "Holders Name".PadRight(17)
+                                      + "Amount".PadRight(12)
+                                      + "Date\n".PadRight(10));
+
+                        Console.WriteLine($"{transaction.TransactionType}".PadRight(22)
+                                       + $"{transaction.Name}".PadRight(17)
+                                       + $"{transaction.Amount}".PadRight(12)
+                                       + $"{transaction.Date}\n\n".PadRight(10));
+
+                        found = true;
+                    }
+                    
+                }
+                if (!found)
+                {
+                    Console.WriteLine("There is no Account between both dates");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        // Looks for Account between min and max
         public void SearchBetweenMaxAndMini(int? mini, int? max)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");
@@ -257,15 +335,17 @@ namespace ModifiedATM.DAL
             }
         }
 
+        // Update objects
         public void UpdateFile(Customer customer)
         {
             List<Customer> list = ReadFile<Customer>("customer.txt");
             
             bool found = false;
 
+            
             for(int i = 0; i < list.Count; i++)
             {
-                if (customer == list[i])
+                if (customer.AccountNumber == list[i].AccountNumber)
                 {
                     list[i] = customer;
                     found = true;
@@ -282,13 +362,11 @@ namespace ModifiedATM.DAL
 
         }
 
-
-
+        //Saves all Prop. into a File
         public static void SaveToFile<T>(List<T> list)
         {
 
             string jsonOutput = JsonConvert.SerializeObject(list, Formatting.Indented);
-            Console.WriteLine(list);
             if (list[0] is Admin)
             {
                 File.WriteAllText("admin.txt", jsonOutput + Environment.NewLine);
@@ -298,14 +376,49 @@ namespace ModifiedATM.DAL
 
                 File.WriteAllText("customer.txt", jsonOutput + Environment.NewLine);
             }
+            else if (list[0] is Transactions)
+            {
+                File.WriteAllText("transaction.txt", jsonOutput + Environment.NewLine);
+            }
+            
             
         }
         
+        // Deduct Balance
         public void ReduceBalance(Customer c, int withdraw)
         {
             c.Balance -= withdraw;
             UpdateFile(c);
         }
 
+        public void TransferMoney(Customer reciever, int amount)
+        {
+            reciever.Balance += amount;
+            UpdateFile(reciever);
+        }
+
+        public void Deposit (Customer c, int amount)
+        {
+            c.Balance += amount;
+            UpdateFile(c);
+        }
+
+        // Saves transactions in Prop.
+        public void SaveReceipt(Customer customer, string typ, int withdrawn, DateTime t)
+        {
+            List<Transactions> list = ReadFile<Transactions>("transaction.txt");
+            Transactions transaction = new()
+            {
+                TransactionType = typ,
+                Name = customer.Username,
+                Amount = withdrawn,
+                Date = DateTime.Now.Date
+            };
+
+
+            list.Add(transaction);
+
+            SaveToFile(list);
+        }
     }
 }

@@ -1,31 +1,17 @@
-﻿
-using ModifiedATM.BO;
+﻿using ModifiedATM.BO;
 using ModifiedATM.DAL;
-using System;
-using System.Data;
-using System.Drawing;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Threading.Channels;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 namespace ModifiedATM.BLL
 {
     public class Logic
     {
-        public bool IsInFile(string username)
-        {
-            Data data = new();
-            
-            return data.IsInFile(username);
-
-        }
-
-        public bool PinIsInFile(int pin)
+        public bool LoginDetailsValid(string username, int pin)
         {
             Data data = new();
 
-            return data.PinIsInFile(pin);
-
+            return data.LoginDetailsValid(username, pin);
         }
 
         public bool AdminInFile(Admin admin)
@@ -42,6 +28,10 @@ namespace ModifiedATM.BLL
             Console.WriteLine("Please selcect one of the following options");
             Console.WriteLine("WithdrawCash-----1");
             Console.WriteLine("FastCash---------2");
+
+            //Whether User types in Y or N
+            char choice;
+
             try
             {
                 if (Console.ReadLine() == "1")
@@ -49,13 +39,13 @@ namespace ModifiedATM.BLL
                 WithdrawCash:
                     int[] CashOptions = new int[] { 500, 1000, 2000, 5000, 10000, 15000, 20000 };
 
-                    Console.WriteLine("1-------{0}" + CashOptions[0]);
-                    Console.WriteLine("2-------{0}" + CashOptions[1]);
-                    Console.WriteLine("3-------{0}" + CashOptions[2]);
-                    Console.WriteLine("4-------{0}" + CashOptions[3]);
-                    Console.WriteLine("5-------{0}" + CashOptions[4]);
-                    Console.WriteLine("6-------{0}" + CashOptions[5]);
-                    Console.WriteLine("7-------{0}" + CashOptions[6]);
+                    Console.WriteLine("1-------" + CashOptions[0]);
+                    Console.WriteLine("2-------" + CashOptions[1]);
+                    Console.WriteLine("3-------" + CashOptions[2]);
+                    Console.WriteLine("4-------" + CashOptions[3]);
+                    Console.WriteLine("5-------" + CashOptions[4]);
+                    Console.WriteLine("6-------" + CashOptions[5]);
+                    Console.WriteLine("7-------" + CashOptions[6]);
 
                     Console.Write("Select one of the denominations of money: ");
                     int select = Convert.ToInt32(Console.ReadLine());
@@ -65,30 +55,43 @@ namespace ModifiedATM.BLL
                     if (select == 1 || select == 2 || select == 3 || select == 4 || select == 5 || select == 6 || select == 7)
                     {
                         Data data = new();
+                        DateTime t = DateTime.Now;
                         Customer customer = data.GetCustomer(username);
+
                         Console.Write("Are you sure you want to withdraw Rs." + CashOptions[select - 1] + "(Y/N): ");
-                        if (Console.ReadLine() == "Y" || Console.ReadLine() == "y")
+                        choice = Convert.ToChar(Console.ReadLine());   
+                        if (choice == 'Y' || choice == 'y')
                         {
                             if (customer != null && customer.Balance > CashOptions[select - 1])
                             {
                                 data.ReduceBalance(customer, CashOptions[select - 1]);
                             }
-
-                            Console.WriteLine("Do you want to print a receipt?: ");
-                            if (Console.ReadLine() == "Y" || Console.ReadLine() == "y")
+                            else
                             {
-                                DateTime t = DateTime.Now;
+                                Console.WriteLine("There is a possibility that you don't have enough money to withdraw " + CashOptions[select - 1]);
+
+                                goto WithdrawCash;
+                            }
+
+                            Console.Write("Do you want to print a receipt?(Y/N): ");
+                            choice = Convert.ToChar(Console.ReadLine());
+                            if (choice == 'y' || choice == 'Y')
+                            {
+                                t = DateTime.Now;
 
                                 string message = "You have withdrawn: ";
 
-                                PrintReceipt(customer, message ,select, t);
+                                PrintReceipt(customer, message ,CashOptions[select - 1] , t);
                             }
                             else
                             {
                                 Environment.Exit(0);
                             }
 
+                            data.SaveReceipt(customer, "Withdraw Cash", CashOptions[select - 1], t);
+
                         }
+
                         else
                         {
                             goto WithdrawCash;
@@ -106,27 +109,41 @@ namespace ModifiedATM.BLL
                 }
                 else
                 {
-
-                    Data data = new();
-                    Customer customer = data.GetCustomer(username);
-
-                    Console.WriteLine("Enter the withdrawal amount: ");
-                    int withdraw = Convert.ToInt16(Console.ReadLine());
-
-                    if (customer != null && customer.Balance > withdraw)
+                FastCash:
                     {
-                        data.ReduceBalance(customer, withdraw);
-                    }
-
-                    Console.WriteLine("Do you want to print a receipt?: ");
-                    if (Console.ReadLine() == "Y" || Console.ReadLine() == "y")
-                    {
+                        Data data = new();
                         DateTime t = DateTime.Now;
+                        Customer customer = data.GetCustomer(username);
 
-                        string message = "Withdrawn: ";
-                        PrintReceipt(customer,message,withdraw, t);
+                        string message = " ";
+
+                        Console.Write("Enter the withdrawal amount: ");
+                        int withdraw = Convert.ToInt16(Console.ReadLine());
+
+                        if (customer != null && customer.Balance >= withdraw)
+                        {
+                            data.ReduceBalance(customer, withdraw);
+                        }
+                        else
+                        {
+                            Console.WriteLine("You don't have enough money to withdraw " + withdraw);
+
+                            goto FastCash;
+                        }
+
+                        Console.WriteLine("Do you want to print a receipt?(Y/N): ");
+                        choice = Convert.ToChar(Console.ReadLine());
+                        if (choice == 'y' || choice == 'Y')
+                        {
+                            t = DateTime.Now;
+
+                            message = "Withdrawn: ";
+                            PrintReceipt(customer, message, withdraw, t);
+                        }
+
+                        data.SaveReceipt(customer, "Withdraw Cash(Normal Cash)", withdraw, t);
+
                     }
-
                 }
             }
            
@@ -136,50 +153,62 @@ namespace ModifiedATM.BLL
             }
         }
 
-        
-
-
         public void CashTransfer(string username)
         {
             CashTransferStart:
 
-            Console.WriteLine("Enter amount in multiples of 500: ");
-            int withdraw = Convert.ToInt16(Console.ReadLine());
+            Console.Write("Enter amount in multiples of 500: ");
+            int transfer = Convert.ToInt16(Console.ReadLine());
 
-            if(withdraw % 500 == 0)
+            if(transfer % 500 == 0)
             {
                 // Customer as logged in
                 Data data = new();
+                DateTime t = DateTime.Now;
                 Customer customer = data.GetCustomer(username);
 
                 
-                Console.WriteLine("Please enter the account number to which you wish to transfer money to: ");
+                Console.Write("Please enter the account number to which you wish to transfer money to: ");
 
                 int guessnumber = Convert.ToInt16(Console.ReadLine());
 
                 // Customer's Pin
-                Data data1 = new();
                 Customer pincustomer = data.GetCustomerOfPin(guessnumber);
 
-                if (PinIsInFile(guessnumber))
+                if (data.AccountNumberInFile(guessnumber))
                 {
-                    Console.WriteLine("You wish to deposit Rs " +  withdraw.ToString("0.000") + " in account held by " + pincustomer.Username  + " If this information is correct please re-enter the account number: ");
-                    int guessnumber1 = Convert.ToInt16(Console.ReadLine());
+                    Console.WriteLine("You wish to deposit Rs " +  transfer.ToString("0.000") + " in account held by " + pincustomer.Username  + " If this information is correct please re-enter the account number: ");
 
-                    if(guessnumber == guessnumber1)
+                    if (guessnumber == Convert.ToInt16(Console.ReadLine()))
                     {
+
+                        if (customer != null && customer.Balance >= transfer)
+                        {
+                            data.ReduceBalance(customer, transfer);
+                            data.TransferMoney(pincustomer, transfer);
+                        }
+                        else
+                        {
+                            Console.WriteLine("There is a possibility that you don't have enough money to transfer " + transfer);
+                            
+                            goto CashTransferStart;
+                        }
+                        
+
                         Console.WriteLine("Transaction confirmed.");
-                        Console.WriteLine("Do you wish to print a receipt (Y/N): ");
+
+
+                        Console.Write("Do you wish to print a receipt (Y/N): ");
 
                         char recepit = Convert.ToChar(Console.ReadLine());
                         
-                        if(Console.ReadLine() == "Y" || Console.ReadLine() == "y") 
+                        if(recepit == 'y' || recepit == 'Y') 
                         {
-                            DateTime t = DateTime.Now;
-
-                            string message = "Amount Transferred: ";
-                            PrintReceipt(customer, message, withdraw, t);
+                            t = DateTime.Now;
+                            PrintReceipt(customer, "Amount Transferred: ", transfer, t);
                         }
+
+                        data.SaveReceipt(customer, "Cash Transfer", transfer, t);
                         
                     }
                     else
@@ -191,7 +220,8 @@ namespace ModifiedATM.BLL
                 }
                 else
                 {
-                    Console.WriteLine("You can't deposit Cash into your own account");
+                    Console.WriteLine("You can't deposit Cash into your own and a non - existing account");
+                    goto CashTransferStart;
                 }
                 
                
@@ -200,6 +230,7 @@ namespace ModifiedATM.BLL
             else
             {
                 Console.WriteLine("The amount you entered was not in multiples of 500 ");
+                goto CashTransferStart;
             }
 
         }
@@ -208,26 +239,30 @@ namespace ModifiedATM.BLL
         {
 
             Data data = new();
+            DateTime t = DateTime.Now;
             Customer customer = data.GetCustomer(username);
-
-            Console.WriteLine("Enter the cash amount to deposit: ");
+            
+            Console.Write("Enter the cash amount to deposit: ");
 
             int deposit = Convert.ToInt16(Console.ReadLine());
 
-            customer.Balance += deposit;
+            data.Deposit(customer, deposit);
 
             Console.WriteLine("\nCash Deposited Successfully.");
 
-            Console.WriteLine("Do you wish to print a receipt (Y/N)? ");
+            Console.Write("Do you wish to print a receipt (Y/N)?: ");
 
+            char recepeit = Convert.ToChar(Console.ReadLine());
 
-            if(Console.ReadLine() == "y" || Console.ReadLine() == "Y")
+            if(recepeit == 'y' || recepeit == 'Y')
             {
-                DateTime t = DateTime.Now;
-
-                string message = "Deposited: ";
-                PrintReceipt(customer, message, deposit, t);
+                t = DateTime.Now;
+                PrintReceipt(customer, "Deposited: ", deposit, t);
+               
             }
+
+            data.SaveReceipt(customer,"Deposit Cash", deposit, t);
+
         }
 
         public void DisplayBalance(string username)
@@ -243,8 +278,19 @@ namespace ModifiedATM.BLL
 
             Console.WriteLine("Balance: " + customer.Balance);
 
+            PrintReceipt(customer, "Displayed Balance", 0, t);
+
+            data.SaveReceipt(customer,"Display Balance", 0, t);
+            
         }
 
+        public static void PrintReceipt(Customer customer, string message, int withdrawn, DateTime t)
+        {
+            Console.WriteLine($"\nAccount #{customer.AccountNumber}");
+            Console.WriteLine($"Date: {t:dd/MM/yyyy}");
+            Console.WriteLine("\n" + message + withdrawn);
+            Console.WriteLine($"Your Balance: {customer.Balance}");
+        }
         #endregion
 
         #region Admin
@@ -312,12 +358,12 @@ namespace ModifiedATM.BLL
         public void DeleteExistingAccount()
         {
             Data data = new();
-            Console.WriteLine("Enter the account number to which you want to delete: ");
+            Console.Write("Enter the account number to which you want to delete: ");
             int chooseAccount = Convert.ToInt32(Console.ReadLine());
 
             Customer customer = data.GetCustomerOfPin(chooseAccount);
 
-            if(PinIsInFile(chooseAccount))
+            if(data.AccountNumberInFile(chooseAccount))
             {
                 Console.WriteLine("You wish to delete the account held by " + customer.Username + "; If this Information is correct please re-enter the account number : ");
                 int chooseAccount1 = Convert.ToInt16(Console.ReadLine());
@@ -347,14 +393,14 @@ namespace ModifiedATM.BLL
         {
             try
             {
-                Console.WriteLine("Enter the Account Number you wish to update: ");
+                Console.Write("Enter the Account Number you wish to update: ");
                 int accountNumber = Convert.ToInt32(Console.ReadLine());
 
                 Data data = new();
 
                 Customer customer = data.GetCustomerOfPin(accountNumber);
 
-                if (PinIsInFile(accountNumber))
+                if (data.AccountNumberInFile(accountNumber))
                 {
                     Console.WriteLine(
                         $"Account #{customer.AccountNumber}\n" +
@@ -367,6 +413,7 @@ namespace ModifiedATM.BLL
 
                     Console.Write("Pin: ");
 
+                    
                     string? changePin = Console.ReadLine();
 
                     if (!string.IsNullOrEmpty(changePin))
@@ -375,7 +422,7 @@ namespace ModifiedATM.BLL
                     }
 
                     // Change Holder's Name
-                    Console.WriteLine("Holders Name: ");
+                    Console.Write("Holders Name: ");
 
                     string? changeName = Console.ReadLine();
 
@@ -385,6 +432,7 @@ namespace ModifiedATM.BLL
                     }
 
                     // Change Status
+                    Console.Write("Status: ");
 
                     string? changeStatus = Console.ReadLine();
 
@@ -395,6 +443,8 @@ namespace ModifiedATM.BLL
                             customer.Status = changeStatus;
                         }
                     }
+
+                    data.UpdateFile(customer);
 
                 }
                 else
@@ -490,7 +540,6 @@ namespace ModifiedATM.BLL
                                       "Your choise: ");
                 }
 
-
                 string? option = Console.ReadLine();
 
                 if (option == "1")
@@ -504,10 +553,35 @@ namespace ModifiedATM.BLL
                     data.SearchBetweenMaxAndMini(min, max);
 
                 }
+
                 else if (option == "2")
                 {
+                    string regExPattern = @"^\d{2}/\d{2}/\d{4}$";
 
+                    TypeDate:
+                    {
+                        Console.Write("Enter the starting date: ");
+                    }
+
+                    var startDate = string.Format("{0:dd/MM/yyyy}", Console.ReadLine());
+                    if (!Regex.IsMatch(startDate, regExPattern))
+                    {
+                        Console.WriteLine("Please format your date like this dd/MM/yyyy the next time\n");
+                        goto TypeDate;
+                    }
+                    
+
+                    Console.Write("Enter the ending date: ");
+                    string endDate = string.Format("{0:dd/MM/yyyy}", Console.ReadLine());
+                    if (!Regex.IsMatch(endDate, regExPattern))
+                    {
+                        Console.WriteLine("Please format your date like this dd/MM/yyyy the next time\n");
+                        goto TypeDate;
+                    }
+
+                    data.SearchDateOfAccount(startDate, endDate);        
                 }
+
                 else
                 {
                     Console.WriteLine("Give in a Valid Number\n");

@@ -1,5 +1,4 @@
-﻿using System;
-using ModifiedATM.BLL;
+﻿using ModifiedATM.BLL;
 using ModifiedATM.BO;
 
 
@@ -23,7 +22,6 @@ namespace ModifiedATM.View
                   {
                       
                       case 1:
-                            bool SignIn = true;
                   LoginCustomer:          
                             
                             Logic logic = new();
@@ -33,10 +31,10 @@ namespace ModifiedATM.View
                             Console.Write("\nEnter Login: ");
                             customer.Username = Console.ReadLine();
 
-                            Console.WriteLine("\nEnter Pin code ");
+                            Console.Write("\nEnter Pin code: ");
                             customer.Pin = Convert.ToInt32(Console.ReadLine());
 
-                            if(logic.IsInFile(customer.Username) && logic.PinIsInFile(customer.Pin))
+                            if(logic.LoginDetailsValid(customer.Username, customer.Pin))
                             {
                                 CustomerView(customer.Username, customer.Pin);
                             }
@@ -65,7 +63,7 @@ namespace ModifiedATM.View
 
                             if (logic1.AdminInFile(admin))
                             {
-                                AdminView(admin.Name, admin.Password);
+                                AdminView();
                             }
                             
                             else
@@ -145,7 +143,7 @@ namespace ModifiedATM.View
         }
 
 
-        public void AdminView(string? username, int? pin)
+        public void AdminView()
         {
             Console.Clear();
             Console.WriteLine("=====Admin View======");
@@ -157,7 +155,7 @@ namespace ModifiedATM.View
                 "6=====Exit");
 
         Options:
-            Console.WriteLine("Please enter one of the options above: ");
+            Console.Write("Please enter one of the options above: ");
 
             int options = Convert.ToInt16(Console.ReadLine());
 

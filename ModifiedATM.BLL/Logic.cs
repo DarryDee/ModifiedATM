@@ -245,19 +245,6 @@ namespace ModifiedATM.BLL
 
         }
 
-        public void Exit (string username)
-        {
-            Environment.Exit(0);
-        }
-         
-        public static void PrintReceipt(Customer customer,string message,int withdrawn, DateTime t)
-        {
-            Console.WriteLine($"Account #{customer.AccountNumber}");
-            Console.WriteLine($"Date: {t:dd/MM/yyyy}");
-            Console.WriteLine("\n"+ message, withdrawn);
-            Console.WriteLine($"{customer.Balance}");
-        }
-
         #endregion
 
         #region Admin
